@@ -14,9 +14,11 @@
     let main_container;
     let word_log = [];
     let bottles = [
-        {x: 600, y: 600, message: "hello"},
-        {x: 800, y: 600, message: "hello"},
-        {x: 900, y: 900, message: "world"},
+        {x: 900, y: 850, message: "This"},
+        {x: 1900, y: 550, message: "is"},
+        {x: 2500, y: 600, message: "a"},
+        {x: 2400 + 600, y: 1200 + 600, message: "secret"},
+        {x: 1024 + 600, y: 1024 + 600, message: "message!"},
         {x: 5000, y: 5000, message: "neverland"}
     ];
     $: current_bottle_index = 0;
@@ -30,18 +32,36 @@
     let tweened_ship_pos = tweened(ship_pos, {duration: 1000, easing: cubicOut});
     $: if (ship_sprite) ship_sprite.position = $tweened_ship_pos;
     // make the tweened_pan react to the tweened ship pos
-    $: frames_x = Math.floor($tweened_ship_pos.x / FRAME_SIZE);
-    $: frames_y = Math.floor($tweened_ship_pos.y / FRAME_SIZE);
+    $: frames_x = Math.min(2, Math.max(0, Math.floor($tweened_ship_pos.x / FRAME_SIZE)));
+    $: frames_y = Math.min(2, Math.max(0, Math.floor($tweened_ship_pos.y / FRAME_SIZE)));
     $: tweened_pan.set({x: frames_x * FRAME_SIZE, y: frames_y * FRAME_SIZE});
+    $: console.log(frames_x, frames_y);
 
     let score = 0;
 
     let topics = [
-        [{left: "evil", right: "good", top: "order", bottom: "chaos", category: "politics"}, {left: "happy", right: "sad", top: "tame", bottom: "chaotic", category: "politics"}],
-        [{left: "evil", right: "good", top: "tame", bottom: "chaotic", category: "politics"}, {left: "evil", right: "good", top: "tame", bottom: "chaotic", category: "politics"}]
+        [{left: "aquatic", right: "terrestrial", top: "huge", bottom: "tiny", category: "animals"},
+         {left: "intense", right: "mild", top: "positive", bottom: "negative", category: "emotions"},
+         {left: "evil", right: "good", top: "order", bottom: "chaos", category: "politics"}
+        ],
+        [ {left: "happy", right: "sad", top: "tame", bottom: "chaotic", category: "c1"},
+         {left: "cold", right: "hot", top: "wet", bottom: "dry", category: "Weather"},
+         {left: "modern", right: "ancient", top: "art", bottom: "science", category: "Academic Disciplines"},
+        ],
+        [{left: "evil", right: "good", top: "order", bottom: "chaos", category: "c3"},
+         {left: "happy", right: "sad", top: "tame", bottom: "chaotic", category: "d3"},
+         {left: "happy", right: "sad", top: "tame", bottom: "chaotic", category: "e3"}
+        ]
     ]
     $: current_topic = topics[frames_y][frames_x];
-    let words_to_vecs;
+    // $: current_topic = topics[1][1];
+    $: console.log(current_topic);
+    let dicts_array = [
+        [{}, {}, {}],
+        [{}, {}, {}],
+        [{}, {}, {}]
+    ]
+    $: words_to_vecs = dicts_array[frames_y][frames_x];
 
     let pickup_dist = 100;
     let mounted = false;
@@ -60,12 +80,20 @@
         }
     }
     onMount(async () => {
-        let screen_data = await fetch("/screen1.json");
-        screen_data = await screen_data.json();
-        console.log(screen_data);
+        // let screen_data = await fetch("/screen1.json");
+        // screen_data = await screen_data.json();
+        // console.log(screen_data);
 
-        words_to_vecs = await fetch("/s1.json");
-        words_to_vecs = await words_to_vecs.json();
+        let g1 = await fetch("/g1.json");
+        dicts_array[0][0] = await g1.json();
+        let g2 = await fetch("/g2.json");
+        dicts_array[0][1] = await g2.json();
+        let g3 = await fetch("/g3.json");
+        dicts_array[0][2] = await g3.json();
+        let g4 = await fetch("/g4.json");
+        dicts_array[1][2] = await g4.json();
+        let g5 = await fetch("/g5.json");
+        dicts_array[1][1] = await g5.json();
 
         const app = new PIXI.Application();
         await app.init({ canvas: canvas, width: 1024, height: 1024, backgroundColor: 0x1099bb });
@@ -84,7 +112,7 @@
         frame.x = 64 * 8;
         frame.y = 64 * 4;
         tilesheet.updateUvs();
-        let tiling_sprite = new PIXI.TilingSprite({ texture: tilesheet, width: 2048, height: 2048 });
+        let tiling_sprite = new PIXI.TilingSprite({ texture: tilesheet, width: 3072, height: 3072 });
         main_container.addChild(tiling_sprite);
 
         let svg_file = await fetch('/drawing.svg');
@@ -136,8 +164,6 @@
         svg = mySVG.contentDocument.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg_paths = mySVG.contentDocument.querySelectorAll('path');
 
-        // TODO
-        add_arrow_to_ship("hello", {x: 100, y: 100});
         // app.stage.addChild(sprite);
         app.ticker.add((ticker) => {
             // tilesheet_sprite.rotation +=  0.01 * ticker.deltaTime;
@@ -151,6 +177,7 @@
         };
     });
     function collides_land(pos) {
+        // TODO: a real barrier instead of a sandbar
         if (!svg_paths) {
             return false;
         }
@@ -166,6 +193,7 @@
             }
             let is_inside = path.isPointInFill(point_obj);
             if (is_inside) {
+                // arrest motion
                 tweened_ship_pos.set($tweened_ship_pos, {duration: 0});
                 return true;
             }
@@ -188,24 +216,28 @@
             event.preventDefault();
         }
     }
-    function handleEnter(event) {
-        if (event.key === "Enter") {
-            console.log("Enter pressed", event.target.value, words_to_vecs[event.target.value]);
-            let delta = words_to_vecs[event.target.value];
-            let factor = 20.0;
-            // ship_sprite.x += delta[0] * factor;
-            tweened_ship_pos.set({x: ship_sprite.x + delta[0] * factor, y: ship_sprite.y + delta[1] * factor});
-            tweened_pan.set({x: 100, y: 100});
-            // ship_sprite.y += delta[1] * factor;
-            event.preventDefault();
-        }
-    }
+    // function handleEnter(event) {
+    //     if (event.key === "Enter") {
+    //         console.log("Enter pressed", event.target.value, words_to_vecs[event.target.value]);
+    //         let delta = words_to_vecs[event.target.value];
+    //         let factor = 20.0;
+    //         // ship_sprite.x += delta[0] * factor;
+    //         tweened_ship_pos.set({x: ship_sprite.x + delta[0] * factor, y: ship_sprite.y + delta[1] * factor});
+    //         tweened_pan.set({x: 100, y: 100});
+    //         // ship_sprite.y += delta[1] * factor;
+    //         event.preventDefault();
+    //     }
+    // }
     function handleReceiveMessage(event) {
         let word = event.detail.message;
         word_log = [...word_log, word];
         console.log("Received message", word);
         let delta = words_to_vecs[word];
-        let factor = 20.0;
+        if (!delta) {
+            // guard word in dictionary
+            return;
+        }
+        let factor = 320.0;
         tweened_ship_pos.set({x: ship_sprite.x + delta[0] * factor, y: ship_sprite.y + delta[1] * factor});
         //
         add_arrow_to_ship(word, {x: delta[0] * factor, y: delta[1] * factor});
@@ -259,7 +291,7 @@
                 </div>
                 <hr>
                 {#each [...word_log].reverse() as word}
-                    <div class="word">{word}</div>
+                    <div class="word font-serif">{word}</div>
                 {/each}
             </div>
             <div class="word_log bg-gray-200 flex-1 flex flex-col bg-white m-4 rounded-lg max-h-1/2 overflow-y-scroll p-4" >
@@ -276,7 +308,7 @@
             <!-- compass rose -->
             <div class="rose_container flex flex-col items-center justify-center m-4 rounded-lg bg-white p-4">
                 <div class="text-4xl font-serif">
-                    Politics
+                    {capitalize(current_topic.category)}
                 </div>
                 <hr>
                 <div class="compass_rose w-64 h-64 bg-contain bg-no-repeat square bg-[url('/rose.png')] relative m-16">

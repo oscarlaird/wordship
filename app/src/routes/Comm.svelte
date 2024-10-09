@@ -1,6 +1,8 @@
 <script>
     // communicate with the backend using websockets
+    import "../app.css";    
     import { createEventDispatcher } from "svelte";
+    import { onMount } from "svelte";
     const dispatch = createEventDispatcher();
     export let messages = ["m1", "m2", "m3"];
     let new_message;
@@ -28,24 +30,45 @@
         dispatch("receive_message", { message: signalData });
         // Handle signal data
     }
+    async function handleKeyPress(event) {
+        if (event.key === "Enter" && new_message) {
+            messages = [...messages, new_message];
+            signalingServer.send(JSON.stringify({ sessionName: sessionName, signalData: new_message }));
+            event.preventDefault();
+        }
+    }
+    onMount(() => {
+        window.addEventListener("keypress", handleKeyPress);
+        return () => {
+            window.removeEventListener("keypress", handleKeyPress);
+        };
+    });
 
 </script>
 
-
-<div class="charbar h-8 w-64 bg-gray-500">
-    <input bind:value={new_message} type="text" placeholder="Type a message..." />
-    <button
-        on:click = {() => {
-            messages = [...messages, new_message];
-            signalingServer.send(JSON.stringify({ sessionName: sessionName, signalData: new_message }));
-        }}
-    >Send</button>
-</div>
-
-
-<div class="chatbox h-screen w-64 bg-gray-200"
->
-    {#each messages as message}
-        <p>{message}</p>
-    {/each}
+<div class="h-screen w-screen flex flex-col justify-center items-center bg-green-600 p-8">
+    <div class="card bg-white p-4 rounded-lg shadow-lg flex flex-col flex-1 w-full h-full overflow-y-scroll gap-2">
+        <div class="text-4xl font-serif flex flex-row justify-center">
+            <input bind:value={new_message} type="text" placeholder="Type a word..."
+                class="border border-gray-400 p-2 m-2 rounded-lg"
+            />
+            <button class="bg-green-900 text-white p-2 m-2 rounded-lg"
+                on:click = {() => {
+                    messages = [...messages, new_message];
+                    signalingServer.send(JSON.stringify({ sessionName: sessionName, signalData: new_message }));
+                }}
+            >Send</button>
+        </div>
+        <hr>
+        <i>Click a message to resend.</i>
+        {#each messages as message}
+            <div class="text-2xl"
+                on:click={() => {
+                    new_message = message;
+                }}
+            >
+                {message}
+            </div>
+        {/each}
+    </div>
 </div>
