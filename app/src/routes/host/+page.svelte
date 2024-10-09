@@ -6,6 +6,9 @@
     import * as PIXI from 'pixi.js';
     import Comm from './Comm.svelte';
     let canvas;
+    let mySVG;
+    let svg;
+    let svg_paths;
     let ship_sprite;
     let ship_sprite_inner;
     let main_container;
@@ -101,14 +104,12 @@
 
         words_to_vecs = await fetch("/s1.json");
         words_to_vecs = await words_to_vecs.json();
-        console.log("revolution", words_to_vecs["revolution"]);
 
         const app = new PIXI.Application();
         await app.init({ canvas: canvas, width: 1024, height: 1024, backgroundColor: 0x1099bb });
 
         await PIXI.Assets.init({ manifest: "/manifest.json"}); // need to load manifest before we can reference bundles
         let tiles = await PIXI.Assets.loadBundle("tiles");
-        console.log(tiles);
 
         main_container = new PIXI.Container();
         // main_container.scale.set(0.5); // TODO ZOOM IN ON INTRO
@@ -124,16 +125,29 @@
         let tiling_sprite = new PIXI.TilingSprite({ texture: tilesheet, width: 2048, height: 2048 });
         main_container.addChild(tiling_sprite);
 
+        let svg_file = await fetch('/drawing.svg');
+        let svg_text = await svg_file.text();
+        // test svg
+            // <svg height="1040px" width="2940px" xmlns="http://www.w3.org/2000/svg" >
+            //     <path id="curve1" stroke="blue" fill="none" stroke-width="4" 
+            //     d="M -266.05404,678.05272 C 230.77585,63.840764 1225.4074,603.54864 1095.1485,1330.6781 c 324.1766,517.9907 1066.4264,422.3671 1565.9771,268.9905"
+            //     />
+            // </svg>
+        const test_svg = new PIXI.Graphics().svg( svg_text);
+        main_container.addChild(test_svg);
+
+
+
         // Create a new Graphics object
-        let graphics = new PIXI.Graphics();
+        // let graphics = new PIXI.Graphics();
         // graphics.moveTo(-200, 600);
-        graphics.moveTo(...screen_data.track_bezier[0].start);
+        // graphics.moveTo(...screen_data.track_bezier[0].start);
         // graphics.bezierCurveTo(100, 100, 200, 200, 1224, 600);
-        for (let curve of screen_data.track_bezier) {
-            graphics.bezierCurveTo(...curve.cp1, ...curve.cp2, ...curve.end);
-        }
-        graphics.stroke({width: 140, color: 0xaaaaff, alpha: 0.4});
-        main_container.addChild(graphics);
+        // for (let curve of screen_data.track_bezier) {
+            // graphics.bezierCurveTo(...curve.cp1, ...curve.cp2, ...curve.end);
+        // }
+        // graphics.stroke({width: 140, color: 0xaaaaff, alpha: 0.4});
+        // main_container.addChild(graphics);
         //
         for (let island_data of screen_data.islands) {
             console.log("Creating island", island_data);
@@ -192,16 +206,9 @@
         ship_sprite.y = 1024 / 2;
         main_container.addChild(ship_sprite);
 
-
-        // test svg
-        const test_svg = new PIXI.Graphics().svg(`
-            <svg height="1040px" width="2940px" xmlns="http://www.w3.org/2000/svg" >
-                <path id="curve1" stroke="blue" fill="none" stroke-width="4" 
-                d="M -266.05404,678.05272 C 230.77585,63.840764 1225.4074,603.54864 1095.1485,1330.6781 c 324.1766,517.9907 1066.4264,422.3671 1565.9771,268.9905"
-                />
-            </svg>
-        `);
-        main_container.addChild(test_svg);
+        // svg for collision testing
+        svg = mySVG.contentDocument.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg_paths = mySVG.contentDocument.querySelectorAll('path');
 
         // TODO
         add_arrow_to_ship("hello", {x: 100, y: 100});
@@ -217,6 +224,29 @@
             window.removeEventListener('keydown', handleKeyPress); 
         };
     });
+    function collides_land(pos) {
+        if (!svg_paths) {
+            return false;
+        }
+        const point_obj = svg.createSVGPoint();
+        point_obj.x = pos.x;
+        point_obj.y = pos.y;
+        let first = true;
+        for (let path of svg_paths) {
+            if (first) {
+                // skip the first path which is the water route
+                first = false;
+                continue;
+            }
+            let is_inside = path.isPointInFill(point_obj);
+            if (is_inside) {
+                tweened_ship_pos.set($tweened_ship_pos, {duration: 0});
+                return true;
+            }
+        }
+        return false;
+    }
+    $: console.log(collides_land($tweened_ship_pos));
     function handleKeyPress(event) {
         // right
         let key_to_rotation = {
@@ -280,12 +310,14 @@
         }, 3000);
     }
     function capitalize(word) {
+        return word.charAt(0).toUpperCase() + word.slice(1);
     }
 
 </script>
 
 <div class="hidden">
     <Comm messages={["m1", "m2", "m3"]} on:receive_message={handleReceiveMessage} />
+    <object data="/drawing.svg" type="image/svg+xml" bind:this={mySVG}></object>
 </div>
 
 <div class="game h-screen w-screen bg-gray-500 flex flex-row items-center justify-center relative" >
@@ -314,10 +346,10 @@
             <!-- compass rose -->
             <div class="rose_container w-full flex flex-row justify-center mb-16">
                 <div class="compass_rose w-64 h-64 bg-contain bg-no-repeat square bg-[url('/rose.png')] relative ">
-                    <div class="north absolute -top-4 left-1/2 transform -translate-y-1/2 -translate-x-1/2              font-serif">{current_topic.top}</div>
-                    <div class="east absolute top-1/2 -right-4 transform translate-x-1/2 -translate-y-1/2 rotate-90     font-serif">{current_topic.right}</div>
-                    <div class="south absolute -bottom-4 left-1/2 transform translate-y-1/2 -translate-x-1/2 rotate-180 font-serif">{current_topic.bottom}</div>
-                    <div class="west absolute bottom-1/2 -left-4 transform -translate-x-1/2 translate-y-1/2 -rotate-90  font-serif">{current_topic.left}</div>
+                    <div class="north absolute -top-4 left-1/2 transform -translate-y-1/2 -translate-x-1/2              font-serif">{capitalize(current_topic.top)}</div>
+                    <div class="east absolute top-1/2 -right-4 transform translate-x-1/2 -translate-y-1/2 rotate-90     font-serif">{capitalize(current_topic.right)}</div>
+                    <div class="south absolute -bottom-4 left-1/2 transform translate-y-1/2 -translate-x-1/2 rotate-180 font-serif">{capitalize(current_topic.bottom)}</div>
+                    <div class="west absolute bottom-1/2 -left-4 transform -translate-x-1/2 translate-y-1/2 -rotate-90  font-serif">{capitalize(current_topic.left)}</div>
                 </div>
             </div>
         </div>
