@@ -46,7 +46,7 @@
         ],
         [ {left: "happy", right: "sad", top: "tame", bottom: "chaotic", category: "c1"},
          {left: "cold", right: "hot", top: "wet", bottom: "dry", category: "Weather"},
-         {left: "modern", right: "ancient", top: "art", bottom: "science", category: "Academic Disciplines"},
+         {left: "ancient", right: "modern", top: "art", bottom: "science", category: "Academic Disciplines"},
         ],
         [{left: "evil", right: "good", top: "order", bottom: "chaos", category: "c3"},
          {left: "happy", right: "sad", top: "tame", bottom: "chaotic", category: "d3"},
