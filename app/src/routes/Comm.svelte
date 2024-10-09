@@ -5,7 +5,8 @@
     export let messages = ["m1", "m2", "m3"];
     let new_message;
     const sessionName = "my-session";  // Customize this dynamically
-    const signalingServer = new WebSocket("ws://localhost:8080");
+    // const signalingServer = new WebSocket("ws://localhost:8080");
+    const signalingServer = new WebSocket("ws://142.93.14.74:8080");
 
     signalingServer.onopen = () => {
         console.log("Connected to signaling server");
