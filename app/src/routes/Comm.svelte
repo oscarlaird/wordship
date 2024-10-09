@@ -4,7 +4,7 @@
     import { createEventDispatcher } from "svelte";
     import { onMount } from "svelte";
     const dispatch = createEventDispatcher();
-    export let messages;
+    export let messages = [];
     let new_message;
     const sessionName = "my-session";  // Customize this dynamically
     // const signalingServer = new WebSocket("ws://localhost:8080");
