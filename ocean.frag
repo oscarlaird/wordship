@@ -1,28 +1,29 @@
 // afl_ext 2017-2024
 // MIT License
 
-#ifdef GL_ES
-precision mediump float;
-#endif
+// #ifdef GL_ES
+// precision mediump float;
+// #endif
 
-uniform vec3      iResolution;           // viewport resolution (in pixels)
-uniform float     iTime;                 // shader playback time (in seconds)
-uniform float     iTimeDelta;            // render time (in seconds)
-uniform float     iFrameRate;            // shader frame rate
-uniform int       iFrame;                // shader playback frame
-uniform float     iChannelTime[4];       // channel playback time (in seconds)
-uniform vec3      iChannelResolution[4]; // channel resolution (in pixels)
-uniform vec4      iMouse;                // mouse pixel coords. xy: current (if MLB down), zw: cl
+// uniform vec3      iResolution;           // viewport resolution (in pixels)
+// uniform float     iTime;                 // shader playback time (in seconds)
+// uniform float     iTimeDelta;            // render time (in seconds)
+// uniform float     iFrameRate;            // shader frame rate
+// uniform int       iFrame;                // shader playback frame
+// uniform float     iChannelTime[4];       // channel playback time (in seconds)
+// uniform vec3      iChannelResolution[4]; // channel resolution (in pixels)
+// uniform vec4      iMouse;                // mouse pixel coords. xy: current (if MLB down), zw: cl
 
 
 
 // Use your mouse to move the camera around! Press the Left Mouse Button on the image to look around!
 
-#define DRAG_MULT 0.08 // changes how much waves pull on the water
+#define DRAG_MULT 0.38 // changes how much waves pull on the water
 #define WATER_DEPTH 1.0 // how deep is the water
 #define CAMERA_HEIGHT 1.5 // how high the camera should be
-#define ITERATIONS_RAYMARCH 12 // waves iterations of raymarching
-#define ITERATIONS_NORMAL 37 // waves iterations when calculating normals
+#define ITERATIONS_RAYMARCH 10 // waves iterations of raymarching
+// #define ITERATIONS_NORMAL 37 // waves iterations when calculating normals
+#define ITERATIONS_NORMAL 27 // waves iterations when calculating normals
 
 #define NormalizedMouse (iMouse.xy / iResolution.xy) // normalize mouse coords
 
@@ -117,6 +118,7 @@ mat3 createRotationMatrixAxisAngle(vec3 axis, float angle) {
 // Helper function that generates camera ray based on UV and mouse
 vec3 getRay(vec2 fragCoord) {
   vec2 uv = ((fragCoord.xy / iResolution.xy) * 2.0 - 1.0) * vec2(iResolution.x / iResolution.y, 1.0);
+  // return vec3(uv.x, -1.0, uv.y);
   // for fisheye, uncomment following line and comment the next one
   //vec3 proj = normalize(vec3(uv.x, uv.y, 1.0) + vec3(uv.x, uv.y, -1.0) * pow(length(uv), 2.0) * 0.05);  
   vec3 proj = normalize(vec3(uv.x, uv.y, 1.5));
@@ -150,7 +152,8 @@ vec3 extra_cheap_atmosphere(vec3 raydir, vec3 sundir) {
 
 // Calculate where the sun should be, it will be moving around the sky
 vec3 getSunDirection() {
-  return normalize(vec3(sin(iTime * 0.1), 1.0, cos(iTime * 0.1)));
+  // return normalize(vec3(sin(iTime * 0.1), 1.0, cos(iTime * 0.1)));
+  return normalize(vec3(sin(0.0 * 0.1), 1.0, cos(iTime * 0.1)));
 }
 
 // Get atmosphere color for given direction
@@ -230,4 +233,11 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   // return the combined result
   vec3 C = fresnel * reflection + scattering;
   fragColor = vec4(aces_tonemap(C * 2.0), 1.0);
+}
+
+void main() {
+    vec2 fragCoord = gl_FragCoord.xy;
+    vec4 fragColor;
+    mainImage(fragColor, fragCoord);
+    gl_FragColor = fragColor;
 }

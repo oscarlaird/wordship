@@ -1,0 +1,37 @@
+{
+    "islands": [
+        {
+            "tiles": [
+                ["water", "land", "land", "water"],
+                ["land", "land", "land", "land"],
+                ["land", "land", "land", "land"],
+                ["water", "land", "land", "water"]
+            ],
+            "position": { "x": 100, "y": 100 },
+            "rotation": 0
+        },
+        {
+            "tiles": [
+                ["water", "water", "land",  "land",  "land"],
+                ["water", "land",  "land",  "land",  "land"],
+                ["land",  "land",  "land",  "land",  "land"],
+                ["land",  "land",  "land",  "land",  "land"],
+                ["land",  "land",  "water", "water", "water"]
+            ],
+            "position": { "x": 300, "y": 300 },
+            "rotation": 0.23
+        }
+    ],
+    "bottle": {
+        "x": 400,
+        "y": 400
+    },
+    "track_bezier": [
+        {
+            "start": [-200, 600],
+            "cp1": [100, 100],
+            "cp2": [200, 200],
+            "end": [1224, 600]
+        }
+    ]
+}
