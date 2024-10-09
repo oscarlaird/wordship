@@ -189,8 +189,9 @@
         console.log("Received message", event.detail.message);
         let delta = words_to_vecs[event.detail.message];
         let factor = 20.0;
-        ship_sprite.x += delta[0] * factor;
-        ship_sprite.y += delta[1] * factor;
+        tweened_ship_pos.set({x: ship_sprite.x + delta[0] * factor, y: ship_sprite.y + delta[1] * factor});
+        // ship_sprite.x += delta[0] * factor;
+        // ship_sprite.y += delta[1] * factor;
     }
 
 </script>

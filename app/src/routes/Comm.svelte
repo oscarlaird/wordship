@@ -6,7 +6,8 @@
     let new_message;
     const sessionName = "my-session";  // Customize this dynamically
     // const signalingServer = new WebSocket("ws://localhost:8080");
-    const signalingServer = new WebSocket("wss://142.93.14.74:8080");
+    // const signalingServer = new WebSocket("wss://142.93.14.74:8080");
+    const signalingServer = new WebSocket("wss://domainnamefortesting.com");
 
     signalingServer.onopen = () => {
         console.log("Connected to signaling server");
