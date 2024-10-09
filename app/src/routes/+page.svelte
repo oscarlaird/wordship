@@ -7,13 +7,16 @@
     let canvas;
     let bottle_sprite;
     let ship_sprite;
+    let ship_pos = {x: 1024.0 / 2.0, y: 1024.0 / 3.0};
+    let tweened_ship_pos = tweened(ship_pos, {duration: 1000, easing: cubicOut});
+    $: if (ship_sprite) ship_sprite.position = $tweened_ship_pos;
+
     let score = 0;
-    // let dummy_island_names = [
-    //     ["water", "land1", "land3", "water", "water"],
-    //     ["land1", "land", "land", "land3", "water"],
-    //     ["land7", "land", "land", "land9", "water"],
-    //     ["water", "land7", "land9", "water", "water"]
-    // ]
+
+    let topics = [
+        [{left: "evil", right: "good", top: "tame", bottom: "chaotic", category: "politics"}, {left: "evil", right: "good", top: "tame", bottom: "chaotic", category: "politics"}],
+        [{left: "evil", right: "good", top: "tame", bottom: "chaotic", category: "politics"}, {left: "evil", right: "good", top: "tame", bottom: "chaotic", category: "politics"}]
+    ]
     let words_to_vecs;
 
     // let dummy_island_names_list = [dummy_island_names_1, dummy_island_names_2];
@@ -77,7 +80,7 @@
         frame.x = 64 * 8;
         frame.y = 64 * 4;
         tilesheet.updateUvs();
-        let tiling_sprite = new PIXI.TilingSprite({ texture: tilesheet, width: 1024, height: 1024 });
+        let tiling_sprite = new PIXI.TilingSprite({ texture: tilesheet, width: 2048, height: 2048 });
         app.stage.addChild(tiling_sprite);
 
         // Create a new Graphics object
@@ -176,8 +179,9 @@
             console.log("Enter pressed", event.target.value, words_to_vecs[event.target.value]);
             let delta = words_to_vecs[event.target.value];
             let factor = 20.0;
-            ship_sprite.x += delta[0] * factor;
-            ship_sprite.y += delta[1] * factor;
+            // ship_sprite.x += delta[0] * factor;
+            tweened_ship_pos.set({x: ship_sprite.x + delta[0] * factor, y: ship_sprite.y + delta[1] * factor});
+            // ship_sprite.y += delta[1] * factor;
             event.preventDefault();
         }
     }
