@@ -25,3 +25,15 @@
         </div>
     </div>
 </div>
+
+<div class="container f-screen w-screen flex flex-col justify-center items-center bg-gray-300">
+    <input
+        type="text"
+        bind:value={room}
+        placeholder="Enter room name"
+    />
+    <div>
+        <button on:click={() => goto(`/play?room=${room}`)}>Join Room</button>
+        <button on:click={() => goto(`/host?room=${room}`)}>Host Room</button>
+    </div>
+</div>

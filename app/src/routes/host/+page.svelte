@@ -4,7 +4,7 @@
     import { cubicOut } from 'svelte/easing';
     import { tick } from 'svelte';
     import * as PIXI from 'pixi.js';
-    import Comm from './Comm.svelte';
+    import Comm from '../Comm.svelte';
     let canvas;
     let mySVG;
     let svg;
@@ -16,7 +16,8 @@
     let bottles = [
         {x: 600, y: 600, message: "hello"},
         {x: 800, y: 600, message: "hello"},
-        {x: 900, y: 900, message: "world"}
+        {x: 900, y: 900, message: "world"},
+        {x: 5000, y: 5000, message: "neverland"}
     ];
     $: current_bottle_index = 0;
     $: current_bottle = bottles[current_bottle_index];
@@ -36,15 +37,13 @@
     let score = 0;
 
     let topics = [
-        [{left: "evil", right: "good", top: "tame", bottom: "chaotic", category: "politics"}, {left: "happy", right: "sad", top: "tame", bottom: "chaotic", category: "politics"}],
+        [{left: "evil", right: "good", top: "order", bottom: "chaos", category: "politics"}, {left: "happy", right: "sad", top: "tame", bottom: "chaotic", category: "politics"}],
         [{left: "evil", right: "good", top: "tame", bottom: "chaotic", category: "politics"}, {left: "evil", right: "good", top: "tame", bottom: "chaotic", category: "politics"}]
     ]
     $: current_topic = topics[frames_y][frames_x];
     let words_to_vecs;
 
-    // let dummy_island_names_list = [dummy_island_names_1, dummy_island_names_2];
     let pickup_dist = 100;
-    let islands = [];
     let mounted = false;
     // DISTANCE PICKUP
     $: update_bottle_pickup($tweened_ship_pos);
@@ -59,43 +58,6 @@
             current_bottle.alpha = 0.2;
             current_bottle_index += 1;
         }
-    }
-    // let tweened_bottle_alpha = tweened(1, {duration: 1000, easing: cubicOut});
-    // $: if (mounted && bottle_sprites.length > 0) bottle_sprites[current_bottle_index].alpha = $tweened_bottle_alpha;
-    // $: dist = (mounted && bottle_sprites.length > 0) ? Math.sqrt((bottle_sprites[current_bottle_index].x - ship_sprite.x) ** 2 + (bottle_sprites[current_bottle_index].y - ship_sprite.y) ** 2) : 1024;
-    // $: if (mounted && dist < pickup_dist && bottle_sprites[current_bottle_index].visible) {
-    //     console.log("Picked up bottle");
-    //     hide_bottle(); // can't do it inline to avoid circular dependency warning
-    //     // bottle_sprite.visible = false;
-    // }
-    // function hide_bottle() {
-    //     // bottle_sprite.visible = false;
-    //     let done_tweening = tweened_bottle_alpha.set(0.2, {duration: 1000});
-    //     done_tweening.then(() => {
-    //         current_bottle_index += 1;
-    //         bottle_sprites[current_bottle_index].visible = false;
-    //         tweened_bottle_alpha.set(1, {duration: 0});
-    //     });
-    //     score += 1;
-    // }
-    function check_legal_move() {
-        // don't let the ship go onto land
-        let current_pos = {x: ship_sprite.x, y: ship_sprite.y};
-        let new_pos = {x: current_pos.x + Math.cos(ship_sprite.rotation + Math.PI / 2) * 10, y: current_pos.y + Math.sin(ship_sprite.rotation + Math.PI / 2) * 10};
-        // check if the new position is on any island
-        for (let island of islands) {
-            // check if the new position is in the island bounding box
-            if (island.getBounds().containsPoint(new_pos.x, new_pos.y)) {
-                // check each individual land tile
-                let land_children_container = island.children[0];
-                for (let child of land_children_container.children) {
-                    if (child.getBounds().containsPoint(new_pos.x, new_pos.y)) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
     }
     onMount(async () => {
         let screen_data = await fetch("/screen1.json");
@@ -149,42 +111,6 @@
         // graphics.stroke({width: 140, color: 0xaaaaff, alpha: 0.4});
         // main_container.addChild(graphics);
         //
-        for (let island_data of screen_data.islands) {
-            console.log("Creating island", island_data);
-            let island_container = new PIXI.Container();
-            let i1land = new PIXI.Container();
-            let i1water = new PIXI.Container();
-            island_container.addChild(i1land);
-            island_container.addChild(i1water);
-            for (let i = 0; i < island_data.tiles.length; i++) {
-                for (let j = 0; j < island_data.tiles[i].length; j++) {
-                    let island_sprite = PIXI.Sprite.from(tiles[island_data.tiles[i][j]]);
-                    island_sprite.x = j * 128;
-                    island_sprite.y = i * 128;
-                    if (island_data.tiles[i][j] === "water") {
-                        // i1water.addChild(island_sprite);
-                    } else {
-                        i1land.addChild(island_sprite);
-                    }
-                }
-            }
-            // add text to the container
-            let text = new PIXI.Text({text: "isl", fontFamily : 'serif', fontSize: 100, fill : 0xff1010, align : 'center'});
-            text.x = island_container.width / 2;
-            text.y = island_container.height / 2;
-            text.anchor.set(0.5);
-            island_container.addChild(text);
-            // pos
-            island_container.position = island_data.position;
-            island_container.pivot.set(island_container.width / 2, island_container.height / 2);
-            island_container.rotation = island_data.rotation;
-            // island_container.rotation = 3.14 / 6.0;
-            // scale down 50%
-            island_container.scale.set(0.5);
-            islands.push(island_container);
-            main_container.addChild(island_container);
-        }
-
         for (let bottle of bottles) {
             let bottle_sprite = PIXI.Sprite.from(tiles.bottle);
             bottle_sprite.x = bottle.x;
@@ -257,12 +183,8 @@
         };
         if (event.key in key_to_rotation) {
             ship_sprite_inner.rotation = key_to_rotation[event.key];
-            if (check_legal_move()) {
-                // ship_sprite.x += Math.cos(ship_sprite.rotation + Math.PI / 2) * 10;
-                // ship_sprite.y += Math.sin(ship_sprite.rotation + Math.PI / 2) * 10;
-                let rate = 160.0;
-                tweened_ship_pos.set({x: ship_sprite.x + Math.cos(ship_sprite_inner.rotation + Math.PI / 2) * rate, y: ship_sprite.y + Math.sin(ship_sprite_inner.rotation + Math.PI / 2) * rate});
-            }
+            let rate = 160.0;
+            tweened_ship_pos.set({x: ship_sprite.x + Math.cos(ship_sprite_inner.rotation + Math.PI / 2) * rate, y: ship_sprite.y + Math.sin(ship_sprite_inner.rotation + Math.PI / 2) * rate});
             event.preventDefault();
         }
     }
@@ -323,20 +245,28 @@
 <div class="game h-screen w-screen bg-gray-500 flex flex-row items-center justify-center relative" >
     <div class="h-[1024px] flex flex-row gap-8">
         <canvas class="h-full w-full border-4 border-black" id="app" bind:this={canvas}></canvas>
-        <div class="h-full w-[400px] bg-green-300 border-4 border-black text-3xl flex flex-col justify-between gap-0 p-0">
+        <div class="h-full w-[400px] bg-green-600 border-4 border-black text-3xl flex flex-col justify-between gap-0 p-0">
+            <!--
             <input type="text" class="w-full p-0 m-0" placeholder="Type here" on:keydown={handleEnter}
             />
             {JSON.stringify(frames_x)} {JSON.stringify(frames_y)}
             {JSON.stringify(current_topic)}
             {JSON.stringify(word_log)}
-            <div class="word_log bg-gray-200" >
-                {#each word_log as word}
+            -->
+            <div class="word_log bg-gray-200 flex-1 flex flex-col bg-white m-4 rounded-lg max-h-1/2 overflow-y-scroll p-4" >
+                <div class="text-4xl font-serif">
+                    Ship Log
+                </div>
+                <hr>
+                {#each [...word_log].reverse() as word}
                     <div class="word">{word}</div>
                 {/each}
             </div>
-            <br>
-            <br>
-            <div class="bottle_messages w-full">
+            <div class="word_log bg-gray-200 flex-1 flex flex-col bg-white m-4 rounded-lg max-h-1/2 overflow-y-scroll p-4" >
+                <div class="text-4xl font-serif">
+                    Message in a Bottle
+                </div>
+                <hr>
                 {#each bottles.slice(0, current_bottle_index) as bottle}
                     <div class="bottle_message">
                         {bottle.message}
@@ -344,8 +274,13 @@
                 {/each}
             </div>
             <!-- compass rose -->
-            <div class="rose_container w-full flex flex-row justify-center mb-16">
-                <div class="compass_rose w-64 h-64 bg-contain bg-no-repeat square bg-[url('/rose.png')] relative ">
+            <div class="rose_container flex flex-col items-center justify-center m-4 rounded-lg bg-white p-4">
+                <div class="text-4xl font-serif">
+                    Politics
+                </div>
+                <hr>
+                <div class="compass_rose w-64 h-64 bg-contain bg-no-repeat square bg-[url('/rose.png')] relative m-16">
+                    <!-- <div class="north absolute -top-16 left-1/2 transform -translate-y-1/2 -translate-x-1/2              font-serif text-4xl">{capitalize(current_topic.category)}</div> -->
                     <div class="north absolute -top-4 left-1/2 transform -translate-y-1/2 -translate-x-1/2              font-serif">{capitalize(current_topic.top)}</div>
                     <div class="east absolute top-1/2 -right-4 transform translate-x-1/2 -translate-y-1/2 rotate-90     font-serif">{capitalize(current_topic.right)}</div>
                     <div class="south absolute -bottom-4 left-1/2 transform translate-y-1/2 -translate-x-1/2 rotate-180 font-serif">{capitalize(current_topic.bottom)}</div>
