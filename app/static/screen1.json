@@ -20,6 +20,17 @@
             ],
             "position": { "x": 300, "y": 300 },
             "rotation": 0.23
+        },
+        {
+            "tiles": [
+                ["water", "water", "land",  "land",  "land"],
+                ["water", "land",  "land",  "land",  "land"],
+                ["land",  "land",  "land",  "land",  "land"],
+                ["land",  "land",  "land",  "land",  "land"],
+                ["land",  "land",  "water", "water", "water"]
+            ],
+            "position": { "x": 900, "y": 900 },
+            "rotation": 0.23
         }
     ],
     "bottle": {
