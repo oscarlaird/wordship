@@ -42,7 +42,7 @@
     let topics = [
         [{left: "aquatic", right: "terrestrial", top: "huge", bottom: "tiny", category: "animals"},
          {left: "intense", right: "mild", top: "positive", bottom: "negative", category: "emotions"},
-         {left: "evil", right: "good", top: "order", bottom: "chaos", category: "politics"}
+         {left: "evil", right: "good", top: "chaos", bottom: "order", category: "politics"}
         ],
         [ {left: "happy", right: "sad", top: "tame", bottom: "chaotic", category: "c1"},
          {left: "cold", right: "hot", top: "wet", bottom: "dry", category: "Weather"},
@@ -237,7 +237,7 @@
             // guard word in dictionary
             return;
         }
-        let factor = 320.0;
+        let factor = 920.0;
         tweened_ship_pos.set({x: ship_sprite.x + delta[0] * factor, y: ship_sprite.y + delta[1] * factor});
         //
         add_arrow_to_ship(word, {x: delta[0] * factor, y: delta[1] * factor});
