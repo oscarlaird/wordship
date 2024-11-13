@@ -5,6 +5,8 @@
     import { tick } from 'svelte';
     import * as PIXI from 'pixi.js';
     import Comm from '../Comm.svelte';
+    let svg_file_name = "/drawing.svg";
+    let background_png_file_name = "/drawing.png";
     let canvas;
     let mySVG;
     let svg;
@@ -115,7 +117,7 @@
         let tiling_sprite = new PIXI.TilingSprite({ texture: tilesheet, width: 3072, height: 3072 });
         main_container.addChild(tiling_sprite);
 
-        let svg_file = await fetch('/drawing.svg');
+        let svg_file = await fetch(svg_file_name);
         let svg_text = await svg_file.text();
         // test svg
             // <svg height="1040px" width="2940px" xmlns="http://www.w3.org/2000/svg" >
@@ -123,8 +125,14 @@
             //     d="M -266.05404,678.05272 C 230.77585,63.840764 1225.4074,603.54864 1095.1485,1330.6781 c 324.1766,517.9907 1066.4264,422.3671 1565.9771,268.9905"
             //     />
             // </svg>
-        const test_svg = new PIXI.Graphics().svg( svg_text);
+        let graphics = new PIXI.Graphics();
+        const test_svg = graphics.svg( svg_text);
         main_container.addChild(test_svg);
+
+        // background png
+        const background_texture = await PIXI.Assets.load(background_png_file_name);
+        const background_sprite = PIXI.Sprite.from(background_texture);
+        main_container.addChild(background_sprite);
 
 
 
@@ -271,7 +279,7 @@
 
 <div class="hidden">
     <Comm messages={["m1", "m2", "m3"]} on:receive_message={handleReceiveMessage} />
-    <object data="/drawing.svg" type="image/svg+xml" bind:this={mySVG}></object>
+    <object data={svg_file_name} type="image/svg+xml" bind:this={mySVG}></object>
 </div>
 
 <div class="game h-screen w-screen bg-gray-500 flex flex-row items-center justify-center relative" >
