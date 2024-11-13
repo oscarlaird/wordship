@@ -45,24 +45,25 @@
     });
 
 </script>
-
-<div class="h-screen w-screen flex flex-col justify-center items-center bg-green-600 p-8">
+<div class="h-screen w-screen flex flex-col justify-center items-center bg-green-600 p-2">
     <div class="card bg-white p-4 rounded-lg shadow-lg flex flex-col flex-1 w-full h-full overflow-y-scroll gap-2">
-        <div class="text-4xl font-serif flex flex-row justify-center">
-            <input bind:value={new_message} type="text" placeholder="Type a word..."
-                class="border border-gray-400 p-2 m-2 rounded-lg"
-            />
-            <button class="bg-green-900 text-white p-2 m-2 rounded-lg"
-                on:click = {() => {
-                    messages = [...messages, new_message];
-                    signalingServer.send(JSON.stringify({ sessionName: sessionName, signalData: new_message }));
-                }}
-            >Send</button>
+        <div class="text-2xl md:text-4xl font-serif flex flex-row justify-center w-full p-2">
+            <div class="flex flex-row flex-1 max-w-xl">
+                <input bind:value={new_message} type="text" placeholder="Type a word..."
+                    class="border border-gray-400 p-2 m-2 rounded-lg flex-1"
+                />
+                <button class="bg-green-900 text-white p-2 m-2 rounded-lg whitespace-nowrap"
+                    on:click = {() => {
+                        messages = [...messages, new_message];
+                        signalingServer.send(JSON.stringify({ sessionName: sessionName, signalData: new_message }));
+                    }}
+                >Send</button>
+            </div>
         </div>
         <hr>
-        <i>Click a message to resend.</i>
-        {#each messages as message}
-            <div class="text-2xl"
+        <i class="text-sm">Click a message to resend.</i>
+        {#each [...messages].reverse() as message}
+            <div class="text-lg md:text-2xl break-words"
                 on:click={() => {
                     new_message = message;
                 }}
