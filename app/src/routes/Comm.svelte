@@ -66,6 +66,8 @@
             <div class="text-lg md:text-2xl break-words"
                 on:click={() => {
                     new_message = message;
+                    messages = [...messages, new_message];
+                    signalingServer.send(JSON.stringify({ sessionName: sessionName, signalData: new_message }));
                 }}
             >
                 {message}
