@@ -34,6 +34,7 @@
         if (event.key === "Enter" && new_message) {
             messages = [...messages, new_message];
             signalingServer.send(JSON.stringify({ sessionName: sessionName, signalData: new_message }));
+            new_message = "";
             event.preventDefault();
         }
     }

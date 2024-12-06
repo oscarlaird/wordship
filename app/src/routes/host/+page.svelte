@@ -16,9 +16,9 @@
     let main_container;
     let word_log = [];
     let bottles = [
-        {x: 900, y: 850, message: "This"},
-        {x: 1900, y: 550, message: "is"},
-        {x: 2500, y: 600, message: "a"},
+        {x: 900, y: 850, message: "You"},
+        {x: 1900, y: 550, message: "win"},
+        {x: 2500, y: 600, message: "the game!"},
         {x: 2400 + 600, y: 1200 + 600, message: "secret"},
         {x: 1024 + 600, y: 1024 + 600, message: "message!"},
         {x: 5000, y: 5000, message: "neverland"}
@@ -86,11 +86,11 @@
         // screen_data = await screen_data.json();
         // console.log(screen_data);
 
-        let g1 = await fetch("/g1.json");
+        let g1 = await fetch("/animals_coordinates.json");
         dicts_array[0][0] = await g1.json();
-        let g2 = await fetch("/g2.json");
+        let g2 = await fetch("/emotions_coordinates.json");
         dicts_array[0][1] = await g2.json();
-        let g3 = await fetch("/g3.json");
+        let g3 = await fetch("/politics_coordinates.json");
         dicts_array[0][2] = await g3.json();
         let g4 = await fetch("/g4.json");
         dicts_array[1][2] = await g4.json();
@@ -238,6 +238,11 @@
     // }
     function handleReceiveMessage(event) {
         let word = event.detail.message;
+        word = word.toLowerCase();
+        if (word_log.includes(word)) {
+            // guard word already logged
+            return;
+        }
         word_log = [...word_log, word];
         console.log("Received message", word);
         let delta = words_to_vecs[word];
