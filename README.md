@@ -114,7 +114,7 @@ python scores3.py
 
 ## Topics
 
-| Grid position | Category | X axis | Y axis |
+| Grid position | Word Category | X axis | Y axis |
 |---|---|---|---|
 | (0,0) | Animals | Aquatic ↔ Terrestrial | Huge ↔ Tiny |
 | (0,1) | Emotions | Intense ↔ Mild | Positive ↔ Negative |
