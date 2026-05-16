@@ -5,11 +5,11 @@ An educational multiplayer word game where players steer a pirate ship by typing
 This game was developed for Education Game Design course project.
 
 ---
-## Goal of the Game
+## 1. Goal of the Game
 
 This game is useful to improve the vocabulary of the players which can be useful in daily conversations or in competitive exams.
 
-## Educational Perspective
+## 2.Educational Perspective
 
 ### Behaviour Perspective
 
@@ -25,7 +25,7 @@ This game is useful to improve the vocabulary of the players which can be useful
 1. Since this is a multiplayer game, the players will be aware of the words being used by everyone. This will help in **collaborative learning**.
 2. Players can also **discuss among each other** and come up with new words so that the ship moves in the appropriate direction.
 
-## How It Works
+## 3. How It Works
 
 A **host** displays the game canvas on a shared screen. **Players** join the same room and type words. Each word is looked up in a pre-computed semantic dictionary and the ship moves accordingly. The map is divided into a 3×3 grid of rooms, each with a different topic and set of semantic axes shown on a compass rose.
 
@@ -40,11 +40,11 @@ WebSocket → signaling server → host
 ![Wordship Gameplay Demo](./Wordship.gif)
 ---
 
-## Running Locally
+## 4. Running Locally
 
 You need two terminals: one for the signaling server and one for the frontend.
 
-### 1. Start the signaling server
+### Start the signaling server
 
 ```bash
 cd signaling_server
@@ -52,7 +52,7 @@ node server.js
 # WebSocket signaling server running on ws://localhost:8080
 ```
 
-### 2. Start the frontend
+### Start the frontend
 
 ```bash
 cd app
@@ -61,7 +61,7 @@ npm run dev
 # http://localhost:5173
 ```
 
-### 3. Open the game
+### Open the game
 
 | Role | URL |
 |------|-----|
@@ -72,7 +72,7 @@ Open the host view on a shared/projected screen. Players join from their own dev
 
 ---
 
-## Project Structure
+## 5. Project Structure
 
 ```
 wordship/
@@ -93,7 +93,7 @@ wordship/
 
 ---
 
-## Word Vector Data Pipeline
+## 6. Word Vector Data Pipeline
 
 The semantic word coordinates are generated offline and served as static JSON. The pipeline:
 
@@ -112,15 +112,14 @@ python scores3.py
 
 ---
 
-## Topics
-
-| Grid position | Word Category | X axis | Y axis |
-|---|---|---|---|
-| (0,0) | Animals | Aquatic ↔ Terrestrial | Huge ↔ Tiny |
-| (0,1) | Emotions | Intense ↔ Mild | Positive ↔ Negative |
-| (0,2) | Politics | Evil ↔ Good | Chaos ↔ Order |
+| Word Category | X axis | Y axis |
+|---|---|---|
+| Animals | Aquatic ↔ Terrestrial | Huge ↔ Tiny |
+| Emotions | Intense ↔ Mild | Positive ↔ Negative |
+| Politics | Evil ↔ Good | Chaos ↔ Order |
 
 ---
+
 
 ## Tech Stack
 
